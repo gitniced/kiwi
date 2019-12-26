@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as slash from 'slash2';
 
 /**
  * 将对象拍平
@@ -120,3 +121,34 @@ export const getConfigFile = () => {
   }
   return kiwiConfigJson;
 };
+
+/**
+ * 获取当前suggest
+ */
+
+ export const getSuggest = () => {
+  const activeEditor = vscode.window.activeTextEditor;
+  const currentFilename = activeEditor.document.fileName;
+  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
+
+  let suggestion = [];
+  if (currentFilename.includes('/pages/')) {
+    suggestion = currentFilename.match(suggestPageRegex);
+  }
+  if (suggestion) {
+    suggestion.shift();
+  }
+  /** 如果没有匹配到 Key */
+  if (!(suggestion && suggestion.length)) {
+    const names = slash(currentFilename).split('/') as string[];
+    const fileName = _.last(names);
+    const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+    const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+    if (dir === fileKey) {
+      suggestion = [dir];
+    } else {
+      suggestion = [dir, fileKey];
+    }
+  }
+  return suggestion;
+ }

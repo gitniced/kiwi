@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
-import { LANG_PREFIX } from './const';
+import { LANG_PREFIX, DISTLANGS } from './const';
 import { getConfiguration } from './utils';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
@@ -21,6 +21,10 @@ export function updateLangFiles(keyValue: string, text: string, validateDuplicat
 
   if (!fs.existsSync(targetFilename)) {
     fs.outputFileSync(targetFilename, generateNewLangFile(fullKey, text));
+    // DISTLANGS.forEach(lang => {
+    //   const targetFilename = `${vscode.workspace.rootPath.replace('/\\/g','/')}/${lang}/${filename}.ts`;
+    //   fs.outputFileSync(targetFilename, generateNewLangFile(fullKey, text));
+    // });
     addImportToMainLangFile(filename);
     vscode.window.showInformationMessage(`成功新建语言文件 ${targetFilename}`);
   } else {
@@ -40,6 +44,11 @@ export function updateLangFiles(keyValue: string, text: string, validateDuplicat
     text = text.replace(/\\n/gm, '\n');
     _.set(obj, fullKey, text);
     fs.writeFileSync(targetFilename, prettierFile(`export default ${JSON.stringify(obj, null, 2)}`));
+    // 同步语言文件
+    // DISTLANGS.forEach(lang => {
+    //   const targetFilename = `${vscode.workspace.rootPath.replace('/\\/g','/')}/${lang}/${filename}.ts`;
+    //   fs.writeFileSync(targetFilename, prettierFile(`export default ${JSON.stringify(obj, null, 2)}`));
+    // });
   }
 }
 /**

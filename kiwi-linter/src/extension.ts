@@ -8,13 +8,14 @@ import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
 import * as slash from 'slash2';
 import { getSuggestLangObj } from './getLangData';
-import { I18N_GLOB, DIR_ADAPTOR } from './const';
+import { I18N_GLOB, DIR_ADAPTOR, DISTLANGS } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
-import { getConfiguration, getConfigFile } from './utils';
+import { getConfiguration, getConfigFile, getSuggest } from './utils';
+import * as minimatch from 'minimatch';
 
 /**
  * 主入口文件
@@ -25,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
     /** 存在配置文件则开启 */
     return;
   }
-  console.log('Congratulations, your extension "kiwi-linter" is now active!');
+  console.log('Congratulations, your extension "kiwi-linter" is now active!', DISTLANGS);
   context.subscriptions.push(vscode.commands.registerCommand('vscode-i18n-linter.findAllI18N', findAllI18N));
   let targetStrs: TargetStr[] = [];
   let finalLangObj = {};
@@ -36,30 +37,52 @@ export function activate(context: vscode.ExtensionContext) {
       targetStrs = newTargetStrs;
     });
   }
-  const currentFilename = activeEditor.document.fileName;
-  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
+  // const currentFilename = activeEditor.document.fileName;
+  // const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
-  let suggestion = [];
-  if (currentFilename.includes('/pages/')) {
-    suggestion = currentFilename.match(suggestPageRegex);
-  }
-  if (suggestion) {
-    suggestion.shift();
-  }
-  /** 如果没有匹配到 Key */
-  if (!(suggestion && suggestion.length)) {
-    const names = slash(currentFilename).split('/') as string[];
-    const fileName = _.last(names);
-    const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
-    const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
-    if (dir === fileKey) {
-      suggestion = [dir];
-    } else {
-      suggestion = [dir, fileKey];
-    }
-  }
+  // let suggestion = [];
+  // if (currentFilename.includes('/pages/')) {
+  //   suggestion = currentFilename.match(suggestPageRegex);
+  // }
+  // if (suggestion) {
+  //   suggestion.shift();
+  // }
+  // /** 如果没有匹配到 Key */
+  // if (!(suggestion && suggestion.length)) {
+  //   const names = slash(currentFilename).split('/') as string[];
+  //   const fileName = _.last(names);
+  //   const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+  //   const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+  //   if (dir === fileKey) {
+  //     suggestion = [dir];
+  //   } else {
+  //     suggestion = [dir, fileKey];
+  //   }
+  // }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
+  //TODO 监听 主语言 文件夹下的变化 并自动修改对应其他语言文件
+  // const lang_watcher = vscode.workspace.createFileSystemWatcher(I18N_GLOB);
+  // vscode.workspace.onDidChangeTextDocument(({document, contentChanges}) => {
+  //   const { fileName } = document; 
+  //   if(minimatch(fileName, '**/.kiwi/zh-CN/**/*.+(ts|js)', {dot: true}) && contentChanges[0]){
+  //     console.log(contentChanges[0]);
+  //   }
+  // });
+  // vscode.workspace.onDidSaveTextDocument((document) => {
+  //   console.log('onDidSaveTextDocument',document.isDirty);
+
+  // });
+  // vscode.workspace.onWillSaveTextDocument((text) => {
+  //   console.log('onWillSaveTextDocument', text);
+  // });
+  // context.subscriptions.push(lang_watcher.onDidChange((...arg) => {
+  //   const uri = arg[0];
+  //    console.log(arg[0])
+
+  //   }));
+
+  
   // 监听 langs/ 文件夹下的变化，重新生成 finalLangObj
   const watcher = vscode.workspace.createFileSystemWatcher(I18N_GLOB);
   context.subscriptions.push(watcher.onDidChange(() => (finalLangObj = getSuggestLangObj())));
@@ -125,6 +148,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (args.varName) {
           return resolve(args.varName);
         }
+        const suggestion = getSuggest();
         // 否则要求用户输入变量名
         return resolve(
           vscode.window.showInputBox({
@@ -232,6 +256,8 @@ export function activate(context: vscode.ExtensionContext) {
               key
             });
           }
+          
+          const suggestion = getSuggest();
           const uuidKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${randomstring.generate({
             length: 4,
             charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'

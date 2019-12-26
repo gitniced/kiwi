@@ -56,9 +56,21 @@ function getDefaultDir() {
   return dir;
 }
 
+// 获取配置文件中  多语言列表
+function getDistLangs() {
+  const fileName = `${vscode.workspace.rootPath}/.kiwi/config.json`;
+  console.log(fileName)
+  let distLangs;
+  if(fs.existsSync(fileName)){
+    distLangs = require(fileName).distLangs;
+  }
+  return distLangs;
+}
+
 const LANG_PREFIX = getDefaultDir();
 const DIR_ADAPTOR = dirAdaptor();
+const DISTLANGS = getDistLangs();
 const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
 
-export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX, DIR_ADAPTOR };
+export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX, DIR_ADAPTOR, DISTLANGS };
