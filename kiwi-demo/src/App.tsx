@@ -29,7 +29,7 @@ class App extends React.Component {
         </div>
         <br />
         <p>
-          <span>{I18N.common.test}</span>
+          <span>测试</span>
         </p>
       </div>
     );

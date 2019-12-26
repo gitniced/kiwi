@@ -6,6 +6,7 @@ import { sync } from './sync';
 import { exportMessages } from './export';
 import { findUnUsed } from './unused';
 import { mockLangs } from './mock';
+import { importMessages } from './import';
 import * as ora from 'ora';
 
 /**
@@ -38,7 +39,7 @@ if (commander.init) {
 }
 
 if (commander.import) {
-  // importMessages();
+  importMessages(commander.import[0], commander.import[1]);
 }
 
 if (commander.export) {
