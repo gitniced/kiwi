@@ -8,6 +8,7 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
+import * as vueCompiler from 'vue-template-compiler';
 
 /**
  * 查找 Ts 文件中的中文
@@ -169,6 +170,30 @@ function findTextInHtml(code) {
   }
   return matches;
 }
+
+/**
+ * 查找 VUE 文中的中文
+ * @param code
+ */
+function findeTextInVue(code, fileName) {
+  const { template, script } = vueCompiler.parseComponent(code, { pad: 'space', deindent: false });
+  const { ast } = vueCompiler.compile(
+    template && `<template>${template.content}</template>` || '', {
+    outputSourceRange: true
+  });
+  
+  let matches = [];
+  if(template){
+    const scriptRsult = findTextInHtml(`<template>${template.content}</template>`);
+    matches = [...matches, ...scriptRsult];
+  }
+  if (script) {
+    const scriptRsult = findTextInTs(script.content, fileName);
+    matches = [...matches, ...scriptRsult];
+  }
+  return matches;
+}
+
 /**
  * 递归匹配代码的中文
  * @param code
@@ -176,6 +201,9 @@ function findTextInHtml(code) {
 export function findChineseText(code: string, fileName: string) {
   if (fileName.endsWith('.html')) {
     return findTextInHtml(code);
+  }
+  if (fileName.endsWith('.vue')) {
+    return findeTextInVue(code, fileName);
   }
   return findTextInTs(code, fileName);
 }

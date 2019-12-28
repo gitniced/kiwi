@@ -37,28 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
       targetStrs = newTargetStrs;
     });
   }
-  // const currentFilename = activeEditor.document.fileName;
-  // const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
-  // let suggestion = [];
-  // if (currentFilename.includes('/pages/')) {
-  //   suggestion = currentFilename.match(suggestPageRegex);
-  // }
-  // if (suggestion) {
-  //   suggestion.shift();
-  // }
-  // /** 如果没有匹配到 Key */
-  // if (!(suggestion && suggestion.length)) {
-  //   const names = slash(currentFilename).split('/') as string[];
-  //   const fileName = _.last(names);
-  //   const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
-  //   const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
-  //   if (dir === fileKey) {
-  //     suggestion = [dir];
-  //   } else {
-  //     suggestion = [dir, fileKey];
-  //   }
-  // }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
   //TODO 监听 主语言 文件夹下的变化 并自动修改对应其他语言文件
@@ -100,7 +79,8 @@ export function activate(context: vscode.ExtensionContext) {
           { scheme: 'file', language: 'html' },
           { scheme: 'file', language: 'typescript' },
           { scheme: 'file', language: 'javascriptreact' },
-          { scheme: 'file', language: 'javascript' }
+          { scheme: 'file', language: 'javascript' },
+          { scheme: 'file', language: 'vue' }
         ],
         {
           provideCodeActions: function(document, range, context, token) {
