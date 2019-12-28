@@ -39,7 +39,7 @@ export function getI18N() {
     if (filename === 'common') {
       return {
         ...prev,
-        ...jsObj
+        common: jsObj
       };
     }
     return {
