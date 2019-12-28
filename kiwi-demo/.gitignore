@@ -22,3 +22,4 @@ yarn-error.log*
 
 .kiwi
 !.kiwi/config.json
+!.kiwi/zh-CN

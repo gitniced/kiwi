@@ -29,7 +29,9 @@ class App extends React.Component {
         </div>
         <br />
         <p>
-          <span>测试</span>
+          <span>{I18N.src.App.test}</span>
+          <span>{I18N.common.test}</span>
+          <span>{I18N.common.commonText}</span>
         </p>
       </div>
     );

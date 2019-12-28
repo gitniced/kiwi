@@ -16,7 +16,7 @@ export default {
   computed: {
     data: {
       get: () => {
-        return I18N.template(I18N.user.index.sda, { val1: text })
+        return `数据${data}`
       }
     }
   },
