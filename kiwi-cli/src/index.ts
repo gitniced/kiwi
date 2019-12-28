@@ -39,7 +39,7 @@ if (commander.init) {
 }
 
 if (commander.import) {
-  importMessages(commander.import[0], commander.import[1]);
+  importMessages();
 }
 
 if (commander.export) {

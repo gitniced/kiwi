@@ -7,14 +7,14 @@ require('ts-node').register({
     module: 'commonjs'
   }
 });
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import * as path from 'path';
 import { tsvParseRows } from 'd3-dsv';
 import * as _ from 'lodash';
 import { getAllMessages, getKiwiDir } from './utils';
 
-const file = process.argv[2];
-const lang = process.argv[3];
+const file = path.resolve(process.cwd(), `${process.argv[3]}`);
+const lang = process.argv[4];
 
 function getMessagesToImport(file) {
   const content = readFileSync(file).toString();
@@ -54,15 +54,16 @@ function sortObject(obj) {
   return rst;
 }
 
-function importMessages(file, lang) {
+function importMessages() {
   const messagesToImport = getMessagesToImport(file);
   const allMessages = getAllMessages();
   const translationFilePath = path.resolve(getKiwiDir(), `text_${lang}.json`);
-  const oldTranslations = require(translationFilePath);
+  const oldTranslations = existsSync(translationFilePath) ? require(translationFilePath) : {};
   const newTranslations = {
     ...oldTranslations
   };
   let count = 0;
+  console.log(messagesToImport, allMessages)
   _.forEach(messagesToImport, (message, key) => {
     if (allMessages.hasOwnProperty(key)) {
       count++;
