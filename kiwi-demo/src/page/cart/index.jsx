@@ -1,3 +1,5 @@
-export default function () {
-  return <div>购物车</div>
+export default {
+  data: ()=>{
+    return '文案'
+  }
 }
