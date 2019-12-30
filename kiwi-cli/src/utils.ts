@@ -25,7 +25,7 @@ function getLangDir(lang) {
 /**
  * 深度优先遍历对象中的所有 string 属性，即文案
  */
-function traverse(obj, cb, fileName?) {
+function traverse(obj, cb) {
   function traverseInner(obj, cb, path) {
     _.forEach(obj, (val, key) => {
       if (typeof val === 'string') {
@@ -35,7 +35,8 @@ function traverse(obj, cb, fileName?) {
       }
     });
   }
-  traverseInner(obj, cb, fileName ? [fileName] : []);
+
+  traverseInner(obj, cb, []);
 }
 
 /**
@@ -108,4 +109,19 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, timeoutPromise]);
 }
 
-export { getKiwiDir, getLangDir, traverse, retry, withTimeout, getAllMessages, getProjectConfig };
+/**
+ * 获取对应语言包
+ * @param lang
+ */
+function getTranslatedText (lang) {
+  const langsDir = getKiwiDir();
+  const distFile = path.resolve(langsDir, `${lang}.ts`);
+  let distTexts = {};
+  if (fs.existsSync(distFile)) {
+    distTexts = require(distFile).default;
+  }
+
+  return distTexts;
+}
+
+export { getKiwiDir, getLangDir, traverse, retry, withTimeout, getAllMessages, getProjectConfig, getTranslatedText };

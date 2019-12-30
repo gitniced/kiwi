@@ -10,29 +10,46 @@ require('ts-node').register({
 import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';
-import { traverse, getProjectConfig, getLangDir } from './utils';
+import { traverse, getProjectConfig, getLangDir, getTranslatedText } from './utils';
+import { translateText } from './mock';
 const CONFIG = getProjectConfig();
-
+let distTexts = {};
 /**
  * 获取中文文案文件的翻译，优先使用已有翻译，若找不到则使用 google 翻译
  * */
-function getTranslations(file, toLang) {
+async function getTranslations(file, toLang) {
   const translations = {};
+  const untranslatedTexts = {};
   const fileNameWithoutExt = path.basename(file).split('.')[0];
   const srcLangDir = getLangDir(CONFIG.srcLang);
-  const distLangDir = getLangDir(toLang);
+  // const distLangDir = getLangDir(toLang);
   const srcFile = path.resolve(srcLangDir, file);
-  const distFile = path.resolve(distLangDir, file);
+  // const distFile = path.resolve(distLangDir, file);
   const { default: texts } = require(srcFile);
-  let distTexts;
-  if (fs.existsSync(distFile)) {
-    const distTexts = require(distFile).default;
-  }
-
-  traverse(texts, (text, path) => {
+  // let distTexts;
+  // if (fs.existsSync(distFile)) {
+  //   distTexts = require(distFile).default;
+  // }
+  traverse(texts, async (text, path) => {
     const key = fileNameWithoutExt + '.' + path;
-    const distText = _.get(distTexts, path);
-    translations[key] = distText || text;
+    const distText = _.get(distTexts, key);
+    if(distText){
+      translations[key] = distText;
+    }else{
+      untranslatedTexts[key] = text;
+    }
+  }); 
+  
+   /** 调用 Google 翻译 */
+   const translateAllTexts = Object.keys(untranslatedTexts).map(key => {
+    return translateText(untranslatedTexts[key], toLang).then(translatedText => [key, translatedText]);
+  });
+  /** 获取 Mocks 文案 */
+  await Promise.all(translateAllTexts).then(res => {
+    res.forEach(([key, translatedText]) => {
+      translations[key] = translatedText;
+    });
+    return translations;
   });
 
   return translations;
@@ -73,8 +90,8 @@ function writeTranslations(file, toLang, translations) {
  * @param file
  * @param toLang
  */
-function translateFile(file, toLang) {
-  const translations = getTranslations(file, toLang);
+async function translateFile(file, toLang) {
+  const translations = await getTranslations(file, toLang);
   const toLangDir = path.resolve(__dirname, `../${toLang}`);
   if (!fs.existsSync(toLangDir)) {
     fs.mkdirSync(toLangDir);
@@ -93,12 +110,16 @@ function sync(callback?) {
       console.error(err);
     } else {
       files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts' && file !== 'mock.ts').map(file => file);
-      const translateFiles = toLang =>
-        Promise.all(
-          files.map(file => {
-            translateFile(file, toLang);
+      const translateFiles = toLang =>{
+        distTexts = getTranslatedText(toLang);
+        console.log(distTexts)
+
+        return Promise.all(
+          files.map(async file => {
+            await translateFile(file, toLang);
           })
         );
+      }
       Promise.all(CONFIG.distLangs.map(translateFiles)).then(
         () => {
           const langDirs = CONFIG.distLangs.map(getLangDir);

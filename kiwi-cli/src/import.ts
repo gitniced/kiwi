@@ -57,8 +57,8 @@ function sortObject(obj) {
 function importMessages() {
   const messagesToImport = getMessagesToImport(file);
   const allMessages = getAllMessages();
-  const translationFilePath = path.resolve(getKiwiDir(), `text_${lang}.json`);
-  const oldTranslations = existsSync(translationFilePath) ? require(translationFilePath) : {};
+  const translationFilePath = path.resolve(getKiwiDir(), `${lang}.ts`);
+  const oldTranslations = existsSync(translationFilePath) ? require(translationFilePath).default : {};
   const newTranslations = {
     ...oldTranslations
   };
@@ -76,7 +76,7 @@ function importMessages() {
   }
 
   const fileContent = JSON.stringify(sortObject(newTranslations), null, 2);
-  writeFileSync(translationFilePath, fileContent);
+  writeFileSync(translationFilePath, `export default ${fileContent}`);
   console.log(`Imported ${count} message(s).`);
 }
 

@@ -18,21 +18,24 @@ function getLangUnTranslate(lang?: string) {
   const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
-
+  
+  const translationFilePath = path.resolve(getKiwiDir(), `${lang}.ts`);
+  const dstMessages = fs.existsSync(translationFilePath) ? require(translationFilePath).default : {};
+  console.log(dstMessages);
   files.map(file => {
     const srcFile = path.resolve(srcLangDir, file);
     const { default: messages } = require(srcFile);
-    const distFile = path.resolve(getLangDir(lang), file);
     const fileName = file.split('.')[0];
-    let dstMessages;
-    if (fs.existsSync(distFile)) {
-      dstMessages = require(distFile).default;
-    }
+    // const distFile = path.resolve(getLangDir(lang), file);
+    // let dstMessages;
+    // if (fs.existsSync(distFile)) {
+    //   dstMessages = require(distFile).default;
+    // }
 
     traverse(messages, (text, path) => {
-      const distText = _.get(dstMessages, path);
-      if (distText === text) {
-        messagesToTranslate.push([`${fileName}.${path}`, text, distText]);
+      const distText = _.get(dstMessages, `${fileName}.${path}`);
+      if (distText === text || !distText) {
+        messagesToTranslate.push([`${fileName}.${path}`, text, distText || text]);
       }
     });
   });

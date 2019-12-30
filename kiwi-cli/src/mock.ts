@@ -113,4 +113,4 @@ async function mockLangs(lang?: string) {
   return Promise.all(mockPromise);
 }
 
-export { mockLangs };
+export { mockLangs, translateText };
