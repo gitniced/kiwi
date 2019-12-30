@@ -16,6 +16,7 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
   let activeEditor = vscode.window.activeTextEditor;
   const currentFilename = activeEditor.document.fileName;
   const isHtmlFile = currentFilename.endsWith('.html');
+  const isVueFile = currentFilename.endsWith('.vue');
   const edit = new vscode.WorkspaceEdit();
   const { document } = vscode.window.activeTextEditor;
   let finalReplaceText = arg.text;
@@ -34,6 +35,8 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
     if (last2Char === '=') {
       if (isHtmlFile) {
         finalReplaceVal = '{{' + val + '}}';
+      } else if (isVueFile) {
+        finalReplaceVal = '"' + val + '"';
       } else {
         finalReplaceVal = '{' + val + '}';
       }
@@ -62,7 +65,7 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
       finalReplaceVal
     );
   } else {
-    if (isHtmlFile) {
+    if (isHtmlFile || isVueFile) {
       edit.replace(document.uri, arg.range, '{{' + val + '}}');
     } else {
       edit.replace(document.uri, arg.range, '{' + val + '}');
