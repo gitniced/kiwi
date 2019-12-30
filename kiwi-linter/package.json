@@ -61,6 +61,11 @@
           "type": "string",
           "default": "**/src/**/*.+(js*|html|ts*)",
           "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
+        },
+        "vscode-i18n-linter.singleFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "The default suggestion prompts I18n.common"
         }
       }
     },

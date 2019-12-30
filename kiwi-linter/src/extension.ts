@@ -128,7 +128,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (args.varName) {
           return resolve(args.varName);
         }
-        const suggestion = getSuggest();
+        const singleFile = getConfiguration('singleFile');
+        const suggestion = singleFile ? ['common'] : getSuggest();
         // 否则要求用户输入变量名
         return resolve(
           vscode.window.showInputBox({
