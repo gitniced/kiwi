@@ -34,6 +34,7 @@
     "google-translate": "^2.2.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
+    "translation.js": "^0.7.12",
     "ts-node": "^7.0.1",
     "tslib": "^1.10.0",
     "typescript": "^3.2.2"
