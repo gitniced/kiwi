@@ -23,6 +23,7 @@ function getLangUnTranslate(lang?: string) {
     const srcFile = path.resolve(srcLangDir, file);
     const { default: messages } = require(srcFile);
     const distFile = path.resolve(getLangDir(lang), file);
+    const fileName = file.split('.')[0];
     let dstMessages;
     if (fs.existsSync(distFile)) {
       dstMessages = require(distFile).default;
@@ -31,7 +32,7 @@ function getLangUnTranslate(lang?: string) {
     traverse(messages, (text, path) => {
       const distText = _.get(dstMessages, path);
       if (distText === text) {
-        messagesToTranslate.push([path, text]);
+        messagesToTranslate.push([`${fileName}.${path}`, text, distText]);
       }
     });
   });

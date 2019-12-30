@@ -18,7 +18,7 @@ const lang = process.argv[4];
 
 function getMessagesToImport(file) {
   const content = readFileSync(file).toString();
-  const messages = tsvParseRows(content, ([key, value]) => {
+  const messages = tsvParseRows(content, ([key, raw, value]) => {
     try {
       // value 的形式和 JSON 中的字符串值一致，其中的特殊字符是以转义形式存在的，
       // 如换行符 \n，在 value 中占两个字符，需要转成真正的换行符。

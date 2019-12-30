@@ -25,7 +25,7 @@ function getLangDir(lang) {
 /**
  * 深度优先遍历对象中的所有 string 属性，即文案
  */
-function traverse(obj, cb) {
+function traverse(obj, cb, fileName?) {
   function traverseInner(obj, cb, path) {
     _.forEach(obj, (val, key) => {
       if (typeof val === 'string') {
@@ -35,8 +35,7 @@ function traverse(obj, cb) {
       }
     });
   }
-
-  traverseInner(obj, cb, []);
+  traverseInner(obj, cb, fileName ? [fileName] : []);
 }
 
 /**
